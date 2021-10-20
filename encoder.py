@@ -35,7 +35,7 @@ class Encoder:
                 self.direction = "R"
             elif newState == "00": # Turned left 1
                 if self.direction == "L":
-                    self.value = self.value - 1
+                    self.value = self.value + 1
                     if self.callback is not None:
                         self.callback(self.value)
 
@@ -44,7 +44,7 @@ class Encoder:
                 self.direction = "L"
             elif newState == "00": # Turned right 1
                 if self.direction == "R":
-                    self.value = self.value + 1
+                    self.value = self.value - 1
                     if self.callback is not None:
                         self.callback(self.value)
 
@@ -55,11 +55,11 @@ class Encoder:
                 self.direction = "R"
             elif newState == "00": # Skipped an intermediate 01 or 10 state, but if we know direction then a turn is complete
                 if self.direction == "L":
-                    self.value = self.value - 1
+                    self.value = self.value + 1
                     if self.callback is not None:
                         self.callback(self.value)
                 elif self.direction == "R":
-                    self.value = self.value + 1
+                    self.value = self.value - 1
                     if self.callback is not None:
                         self.callback(self.value)
                 
