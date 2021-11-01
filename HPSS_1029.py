@@ -194,9 +194,11 @@ def valueChanged(value, direction): #-------------------------------------------
 # 작은 얼룩일 때용으로 만든거라 현재 센싱 중인 작은 값에 대해서는 더해지지 않아서 실제보단 살짝 짧음.
 # for문으로 돌리는 게 아니라 한번 구문이 수행될 때 추가되는 값이라서 sensing 값은 그릴 때 추가해서 그려야 함.
     # Calculating small spots(=stain) in real time.
-    if len(ROT)>=1 and c < len(list_p): # 시작을 10cm 미만의 핀으로 하면 실시간으로 보여줄 때는 이 값까지 stain으로 묶어서 보여줌 
-      if list_p[-1][1]<chk:
-        stain += list_p[-1][1] # no add sensing value
+    if len(ROT)>=1 and c < len(list_p): # 시작을 10cm 미만의 핀으로 하면 실시간으로 보여줄 때는 이 값까지 stain으로 묶어서 보여줌
+        if len(list_p) == 2 and list_p[-1][0] == "S":
+            stain += list_p[-1][1] # no add sensing value
+        if len(list_p) > 2 andlist_p[-1][1]<chk:
+            stain += list_p[-1][1] # no add sensing value
 
 # 5. 드로우 카운트 초기화    
     draw_count += 1
@@ -237,8 +239,9 @@ def valueChanged(value, direction): #-------------------------------------------
         if choice.value == "P": #-----------------------------------------------------------------------------------------------------
             #list_p -> list_t
             for o in range(1, len(list_p)): # 1 2 ...
-            
-                if list_p[o][1] < chk:
+                if o==1 and list_p[o][0] != 0:
+                    t += list_p[o][1]
+                if o!=1 and list_p[o][1] < chk:
                     t += list_p[o][1]
                     S.append(list_p[o][0]) # sign: adding small stains
                 else:
