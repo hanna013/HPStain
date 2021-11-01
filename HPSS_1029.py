@@ -187,6 +187,8 @@ def valueChanged(value, direction): #-------------------------------------------
     # sensing value adjust - s_flag
     if s_flag==1:
         sensing= round(((value-int(chk*resolution/circum)+1)*circum/resolution),2)
+    else:
+        sensing= round(((value+1)*circum/resolution),2) # 정의
 
 # 4. stain(=얼룩 실시간 디스플레이용) 계산
 # 작은 얼룩일 때용으로 만든거라 현재 센싱 중인 작은 값에 대해서는 더해지지 않아서 실제보단 살짝 짧음.
@@ -195,7 +197,6 @@ def valueChanged(value, direction): #-------------------------------------------
     if len(ROT)>=1 and c < len(list_p):
       if list_p[-1][1]<chk:
         stain += list_p[-1][1] # no add sensing value
-      elif list_p[-1][1]>chk
 
 # 5. 드로우 카운트 초기화    
     draw_count += 1
