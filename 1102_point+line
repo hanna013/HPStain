@@ -145,8 +145,9 @@ def valueChanged(value, direction): #-------------------------------------------
     #print("p=",point)
     #print(sensing)
     #print("v=",value)
-    print("t=", list_t)
     print(list_p)
+    print("t=", list_t)
+    print("\n")
    
 # 1. value 초기화
     if round((value*circum/resolution),2)> size: # 버저 여러 번 안 울리기 위해서는 초기화 값 조정이 중요
@@ -253,6 +254,8 @@ def valueChanged(value, direction): #-------------------------------------------
             
                 if o==1 and list_p[o][0] != 0:
                     t += list_p[o][1]
+                    S.append(list_p[o][0]) # sign: adding small stains
+                    
                 if o!=1 and list_p[o][1] < chk:
                     t += list_p[o][1]
                     S.append(list_p[o][0]) # sign: adding small stains
@@ -314,9 +317,11 @@ def valueChanged(value, direction): #-------------------------------------------
 
 # 10. 3m 넘어가는 값 삭제(뺄셈)  
     # Over 3m, remove / must be after draw source
-    if total+sensing >= size: 
+    if total+sensing >= size:
+        print("over 3M")
         over_3M=1
-        list_p[1][1] = round(list_p[1][1]-(total+sensing-size),2)
+        list_p[1][1] = round(list_p[1][1]-(total+sensing-size),2) 
+        # 센싱이 음수값이 나오면/TOTAL이 이미 더 작은 값으로 계산됐고, SENSING이 큰 거임. 이미 어쨋든 사이즈보다 크니까 값은 줄어들거고 그럼 음수값이 더 음수가 되니까 음수값은 바로 삭제
         if list_p[1][1]<=0.1: 
             del list_p[1]
             buz_case=1
