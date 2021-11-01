@@ -147,13 +147,15 @@ def valueChanged(value, direction): #-------------------------------------------
     #print("v=",value)
     #print("t=", list_t)
     #print(list_p)
-    
+   
+# 1. value 초기화
     if sensing> 310:
         e1.resetValue()
     
     no_stain=0
     p_flag=0
 
+# 2. 얼룩 <-> 핀, p에 값 저장
     if GPIO.input(CFA)==0 : # Adjust the optical fiber sensor so that there's no wrong value.
         ROT.append([1]) # To check if it's a real stain
 
@@ -181,23 +183,22 @@ def valueChanged(value, direction): #-------------------------------------------
             list_p.append([0,round((value)*circum/resolution,2)])
             s_flag=1
         detect = 0
-    
+# 3. sensing 값 조정 - s_flag가 뜨면 10cm가 두번 계산됨   
     # sensing value adjust - s_flag
     if s_flag==1:
         sensing= round(((value-int(chk*resolution/circum)+1)*circum/resolution),2)
-    else:
-        sensing= round((value*circum/resolution),2)
 
-    
+# 4. stain(=얼룩 실시간 디스플레이용) 계산
     # Calculating small spots(=stain) in real time.
-    if len(ROT)>=1 and c < len(list_p):
-        if list_p[-1][1]<chk:
-            stain += list_p[-1][1] # no add sensing value
-    
+    if len(ROT)>=1 and c < len(list_p) and list_p[-1][1]<chk:
+        stain += list_p[-1][1] # no add sensing value
+
+# 5. 드로우 카운트 초기화    
     draw_count += 1
-    if draw_count > 1000:
-        draw_count = draw_count%1000
-    
+    if draw_count == 1000:
+        draw_count = 0
+
+# 6. 텍스트 변경 및 ROT, stain 초기화    
     # text
     if choice.value == "P":
         if detect==1 and stain>0: 
@@ -216,7 +217,8 @@ def valueChanged(value, direction): #-------------------------------------------
         else:
             text_1.value="No Stain"
             text_1.text_color = "green"
-    
+
+ # 7. t, point 새로 계산    
     # SET list_t, point
     if a < len(list_p) or over_3M==1 or del_R==1 or p_flag==1:
         list_t=[[0,0]]
@@ -226,6 +228,7 @@ def valueChanged(value, direction): #-------------------------------------------
         t=0
         S=[] # stain or not 
         
+        # 7.1 t 계산
         if choice.value == "P": #-----------------------------------------------------------------------------------------------------
             #list_p -> list_t
             for o in range(1, len(list_p)): # 1 2 ...
@@ -236,25 +239,24 @@ def valueChanged(value, direction): #-------------------------------------------
                 else:
                     if len(S)>0:
                         list_t.append(["S",round(t,2)]) #cfa value not precise, all small value become stain -> error cause?
-                        if b < len(list_t):
-                            write_file(str(time1)+"    "+str(list_t[-1])+"\n")
+                        write_file(str(time1)+"    "+str(list_t[-1])+"\n")
                         S=[]
                         t=0
                         list_t.append([list_p[o][0],list_p[o][1]]) # it might be not pin, it can be long full-stain.
-                        if b < len(list_t) and list_p[o][0]=="S":
+                        if list_p[o][0]=="S":
                             write_file(str(time1)+"    "+str(list_t[-1])+"  Please calculate by adding this and the previous stain length\n")
     
                     else:
                         list_t.append([list_p[o][0],list_p[o][1]])
-                        if b < len(list_t) and list_p[o][0]=="S":
+                        if list_p[o][0]=="S":
                             write_file(str(time1)+"    "+str(list_t[-1])+"\n")
-                            
+        # 7.3 pre_point 선정                    
         if choice.value == "P":
             pre_point= list_t
         elif choice.value == "L":
             pre_point= list_p
         
-        
+        # 7.4 point 계산
         # pre_point -> point
         point=[[0,0]]*len(pre_point)
         for i in range(len(pre_point)): # 0 1 2 ...
@@ -265,6 +267,7 @@ def valueChanged(value, direction): #-------------------------------------------
             point[i]=[pre_point[i][0],plus]
             plus=0
     
+# 8. 핀이 후진 시 값 변경(기록값 뺄셈)
     if direction=="R" and sensing<0:
         list_p[-1][1] = round(list_p[-1][1]+sensing,2)
         print("minus")
@@ -273,6 +276,7 @@ def valueChanged(value, direction): #-------------------------------------------
             del_R=1
             print("del latest one")
     
+# 9. 디스플레이
     #draw
     if draw_count%10==0:
         
@@ -288,15 +292,16 @@ def valueChanged(value, direction): #-------------------------------------------
         elif value > 0 and detect ==1 and choice.value=="L":
             drawing.rectangle((size-sensing)*factor_w, y1, size*factor_w, y2, color="orange")
 
+# 10. 3m 넘어가는 값 삭제(뺄셈)  
     # Over 3m, remove / must be after draw source
     if total+sensing >= size: 
         over_3M=1
         list_p[1][1] = round(list_p[1][1]-(total+sensing)-size,2)
         if list_p[1][1]<=0.1:
             del list_p[1]
-            drawing.rectangle(0,y1,1*factor_w, y2, color="gold")
             buz_case=1
-    
+
+# 11. 경광등    
     if buz_case==1 and list_t[-1][1]+stain >= size:
         flag_del += 1
     if choice.value == "L":
