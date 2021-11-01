@@ -320,6 +320,7 @@ def valueChanged(value, direction): #-------------------------------------------
         if list_p[1][1]<=0.1: 
             del list_p[1]
             buz_case=1
+            print("delete first point")
 
 # 11. 경광등
     #buzzer3_끝과 끝
