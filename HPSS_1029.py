@@ -149,7 +149,7 @@ def valueChanged(value, direction): #-------------------------------------------
     #print(list_p)
    
 # 1. value 초기화
-    if sensing> 310:
+    if sensing> 300: # 버저 여러 번 안 울리기 위해서는 초기화 값 조정이 중요
         e1.resetValue()
     
     no_stain=0
@@ -189,9 +189,13 @@ def valueChanged(value, direction): #-------------------------------------------
         sensing= round(((value-int(chk*resolution/circum)+1)*circum/resolution),2)
 
 # 4. stain(=얼룩 실시간 디스플레이용) 계산
+# 작은 얼룩일 때용으로 만든거라 현재 센싱 중인 작은 값에 대해서는 더해지지 않아서 실제보단 살짝 짧음.
+# for문으로 돌리는 게 아니라 한번 구문이 수행될 때 추가되는 값이라서 sensing 값은 그릴 때 추가해서 그려야 함.
     # Calculating small spots(=stain) in real time.
-    if len(ROT)>=1 and c < len(list_p) and list_p[-1][1]<chk:
+    if len(ROT)>=1 and c < len(list_p):
+      if list_p[-1][1]<chk:
         stain += list_p[-1][1] # no add sensing value
+      elif list_p[-1][1]>chk
 
 # 5. 드로우 카운트 초기화    
     draw_count += 1
@@ -279,15 +283,15 @@ def valueChanged(value, direction): #-------------------------------------------
 # 9. 디스플레이
     #draw
     if draw_count%10==0:
-        
+        # 9.1 얼룩 묶음으로 저장된 값
         drawing.rectangle(0,y1,size*factor_w, y2, color="gold") # initialize
         for k in range(1,len(point)): # sensing ++ -> 
             if point[k][0] == "S":
                 drawing.rectangle((size-point[k][1]-sensing-stain)*factor_w, y1, (size-point[k][1]-sensing-stain+pre_point[k][1])*factor_w, y2, color="red")
-        
+        # 9.2 현재 센싱 및 판별 중인 값
         # To display it in real time-------------------------------------------------------------------------------------------------------------------------@
         if len(ROT)>0 and choice.value=="P":
-            drawing.rectangle((size-stain)*factor_w, y1, size*factor_w, y2, color="orange")
+            drawing.rectangle((size-stain-sensing)*factor_w, y1, size*factor_w, y2, color="orange")
             # can be tiny differance but it's not critical.
         elif value > 0 and detect ==1 and choice.value=="L":
             drawing.rectangle((size-sensing)*factor_w, y1, size*factor_w, y2, color="orange")
@@ -296,31 +300,33 @@ def valueChanged(value, direction): #-------------------------------------------
     # Over 3m, remove / must be after draw source
     if total+sensing >= size: 
         over_3M=1
-        list_p[1][1] = round(list_p[1][1]-(total+sensing)-size,2)
-        if list_p[1][1]<=0.1:
+        list_p[1][1] = round(list_p[1][1]-(total+sensing-size),2)
+        if list_p[1][1]<=0.1: 
             del list_p[1]
+            print("delete") # 값이 중간에 사라지는 이유는 아직 확실 x
             buz_case=1
 
-# 11. 경광등    
+# 11. 경광등
+    #buzzer3_끝과 끝
     if buz_case==1 and list_t[-1][1]+stain >= size:
         flag_del += 1
     if choice.value == "L":
         if buz_case==1 and list_p[-1][1]+stain >= size:
             flag_del += 1
-        
-    
     
     #warning_1_rot & light
     if detect == 1 and len(ROT)==2  : # stain find & exist
         warning_rot_light()
 
-    if detect==0 and round((value*circum/resolution),2)>=299 and over_3M!=2:
+    if detect==0 and round((value*circum/resolution),2)>=299 and over_3M!=2: # 경광등이 여러번 울리면 2번째 조건 때문에 울리는 것. 그래서 value 초기화 값 조정해야 함.
     # light auto off
         light_off.bg="light gray"
-        no_stain=1
+        # buzzer 2, if 조건이 해당되서 경광등이 여러번 울리는 것을 막기 위해, value == 몇으로?
+        no_stain =1
         GPIO.output(light,GPIO.LOW)
     
     # warning2_buzzer
+    # buzzer 1: 중간에 42 이상 값 있을 때
     if choice.value == "P":
         if len(list_t) > 1 and over_3M==0: # ------------------------------------------------------------------------------- a>1
             if list_t[1][0]==0 and list_t[1][1] >= pin_length and point[0][1]+round(value*circum/resolution,2)>= 299: # == 299 (x) #리스트 0번째 값 없애면 여기도 수정하기.
@@ -333,11 +339,13 @@ def valueChanged(value, direction): #-------------------------------------------
                 buzzer_off.bg="orange"
                 buzzer_off.after(5000,stop_buz)
                 GPIO.output(buzzer,GPIO.HIGH)
+    # buzzer 2: 마지막 얼룩이 3m를 모두 지나갔을 때
     if no_stain==1:
         buzzer_off.bg="orange"
         buzzer_off.after(5000,stop_buz)
         GPIO.output(buzzer,GPIO.HIGH)
-    if flag_del!=0 and flag_del<3:
+    # buzzer 3: 
+    if flag_del!=0 and flag_del<3: # flag_del=1 이면 안 되는 이유? 그 사이에 구문이 여러번 반복되서 딱 1이 아닐 수 있음. 그냥 안 올리고 1, 0으로 하면?
         flag_del=0
         buz_case=0
         buzzer_off.bg="orange"
