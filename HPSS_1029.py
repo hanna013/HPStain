@@ -292,7 +292,7 @@ def valueChanged(value, direction): #-------------------------------------------
         # 9.2 현재 센싱 및 판별 중인 값
         # To display it in real time-------------------------------------------------------------------------------------------------------------------------@
         if len(ROT)>0 and choice.value=="P":
-            drawing.rectangle((size-stain-sensing)*factor_w, y1, size*factor_w, y2, color="orange")
+            drawing.rectangle((size-stain-sensing)*factor_w, y1, size*factor_w, y2, color="orange") # 10cm 미리 저장한 핀은 10cm보다 조금 더 커서 stain엔 안 들어가서 안 겹침.
             # can be tiny differance but it's not critical.
         elif value > 0 and detect ==1 and choice.value=="L":
             drawing.rectangle((size-sensing)*factor_w, y1, size*factor_w, y2, color="orange")
