@@ -194,7 +194,7 @@ def valueChanged(value, direction): #-------------------------------------------
 # 작은 얼룩일 때용으로 만든거라 현재 센싱 중인 작은 값에 대해서는 더해지지 않아서 실제보단 살짝 짧음.
 # for문으로 돌리는 게 아니라 한번 구문이 수행될 때 추가되는 값이라서 sensing 값은 그릴 때 추가해서 그려야 함.
     # Calculating small spots(=stain) in real time.
-    if len(ROT)>=1 and c < len(list_p):
+    if len(ROT)>=1 and c < len(list_p): # 시작을 10cm 미만의 핀으로 하면 실시간으로 보여줄 때는 이 값까지 stain으로 묶어서 보여줌 
       if list_p[-1][1]<chk:
         stain += list_p[-1][1] # no add sensing value
 
