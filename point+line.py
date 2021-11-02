@@ -45,7 +45,6 @@ point=[[0,0]]
 stain=0 # there is a gap between saving and showing
 sensing=0
 s_flag=0
-pre_point=[[0,0]]
 
 def rotation_off():
     rotation_off.bg = "light gray"
@@ -62,7 +61,7 @@ def light_off():
     GPIO.output(light,GPIO.LOW)
     
 def reset():
-    global list_p, pre_point, detect, over_3M, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
+    global list_p, detect, over_3M, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
     
     list_p = [[0,0]] # save length
     detect = 2 # marking CFA status 
@@ -85,7 +84,6 @@ def reset():
     sensing=0
     flag_del=0
     s_flag=0
-    pre_point=[[0,0]]
     
     rotation_off.bg = "light gray"
     GPIO.output(rot,GPIO.LOW)
@@ -141,7 +139,7 @@ def warning_rot_light():
     rotation_off.after(5000,stop_rot)
 
 def valueChanged(value, direction): #----------------------------------------------------------------------------------------------------------------
-    global choice, pre_point, list_p, detect, over_3M, pin_length, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
+    global list_p, detect, over_3M, pin_length, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
     
     #print("p=",point)
     #print(sensing)
@@ -164,7 +162,7 @@ def valueChanged(value, direction): #-------------------------------------------
 # 2. p에 값 저장, 얼룩 <-> 핀
     if GPIO.input(CFA)==0 : # Adjust the optical fiber sensor so that there's no wrong value.
         ROT.append([1]) # To check if it's a real stain
-
+        cfa_txt.text_color = "yellow"
         #write detecting time
         if len(ROT)==2: #
             time1= time.strftime('%X',time.localtime(time.time()))
@@ -186,6 +184,7 @@ def valueChanged(value, direction): #-------------------------------------------
             
         detect = 1 
     else:
+        cfa_txt.text_color = "red"
         #save or not
         if detect == 1:
             list_p.append(["S",round((value)*circum/resolution,2)])
@@ -218,23 +217,14 @@ def valueChanged(value, direction): #-------------------------------------------
 
 # 6. 텍스트 변경 및 ROT, stain 초기화    
     # text
-    if choice.value == "P":
-        if detect==1 and stain>0: 
-            #text_1.value="Stain"
-            text_1.value="Stain:",int(stain+sensing),"cm" # can be tiny differance 
-            text_1.text_color = "red"
-        elif detect==0 and s_flag==1: # ----------------------------------------text delay
-            text_1.value="No Stain"
-            text_1.text_color = "green"
-            ROT=[] 
-            stain=0
-    elif choice.value == "L":
-        if detect == 1:
-            text_1.value="Stain:",round(value*circum/resolution,2),"cm"
-            text_1.text_color = "red"
-        else:
-            text_1.value="No Stain"
-            text_1.text_color = "green"
+    if detect==1 and stain>0: 
+        text_1.value="Stain:",int(stain+sensing),"cm" # can be tiny differance 
+        text_1.text_color = "red"
+    elif detect==0 and s_flag==1: # ----------------------------------------text delay
+        text_1.value="No Stain"
+        text_1.text_color = "green"
+        ROT=[] 
+        stain=0
 
  # 7. t, point 새로 계산    
     # SET list_t, point
@@ -247,41 +237,33 @@ def valueChanged(value, direction): #-------------------------------------------
         S=[] # stain or not 
         
         # 7.1 t 계산
-        if choice.value == "P": #-----------------------------------------------------------------------------------------------------
-            #list_p -> list_t
-            for o in range(1, len(list_p)): # 1 2 ..
-                if list_p[o][1] < chk:
-                    t += list_p[o][1]
-                    S.append(list_p[o][0]) # sign: adding small stains
+        #list_p -> list_t
+        for o in range(1, len(list_p)): # 1 2 ..
+            if list_p[o][1] < chk:
+                t += list_p[o][1]
+                S.append(list_p[o][0]) # sign: adding small stains
+            else:
+                if len(S)>0:
+                    list_t.append(["S",round(t,2)])
+                    write_file(str(time1)+"    "+str(list_t[-1])+"\n")
+                    S=[]
+                    t=0
+                    list_t.append([list_p[o][0],list_p[o][1]]) # it might be not pin, it can be long full-stain.
+                    if list_p[o][0]=="S":
+                        write_file(str(time1)+"    "+str(list_t[-1])+"  Please calculate by adding this and the previous stain length\n")
                 else:
-                    if len(S)>0:
-                        list_t.append(["S",round(t,2)])
+                    list_t.append([list_p[o][0],list_p[o][1]])
+                    if list_p[o][0]=="S":
                         write_file(str(time1)+"    "+str(list_t[-1])+"\n")
-                        S=[]
-                        t=0
-                        list_t.append([list_p[o][0],list_p[o][1]]) # it might be not pin, it can be long full-stain.
-                        if list_p[o][0]=="S":
-                            write_file(str(time1)+"    "+str(list_t[-1])+"  Please calculate by adding this and the previous stain length\n")
-    
-                    else:
-                        list_t.append([list_p[o][0],list_p[o][1]])
-                        if list_p[o][0]=="S":
-                            write_file(str(time1)+"    "+str(list_t[-1])+"\n")
-        # 7.3 pre_point 선정                    
-        if choice.value == "P":
-            pre_point= list_t
-        elif choice.value == "L":
-            pre_point= list_p
         
-        # 7.4 point 계산
-        # pre_point -> point
-        point=[[0,0]]*len(pre_point)
-        for i in range(len(pre_point)): # 0 1 2 ...
-            for j in range(i,len(pre_point)):
-                plus = round(plus + pre_point[j][1],2)
+        # 7.2 point 계산
+        point=[[0,0]]*len(list_t)
+        for i in range(len(list_t)): # 0 1 2 ...
+            for j in range(i,len(list_t)):
+                plus = round(plus + list_t[j][1],2)
             if i==0:
                 total = plus
-            point[i]=[pre_point[i][0],plus]
+            point[i]=[list_t[i][0],plus]
             plus=0
     
 # 8. 핀이 후진 시 값 변경(기록값 뺄셈)
@@ -303,11 +285,9 @@ def valueChanged(value, direction): #-------------------------------------------
                 drawing.rectangle((size-point[k][1]-sensing-stain)*factor_w, y1, (size-point[k][1]-sensing-stain+pre_point[k][1])*factor_w, y2, color="red")
         # 9.2 현재 센싱 및 판별 중인 값
         # To display it in real time-------------------------------------------------------------------------------------------------------------------------@
-        if len(ROT)>0 and choice.value=="P":
+        if len(ROT)>0:
             drawing.rectangle((size-stain-sensing)*factor_w, y1, size*factor_w, y2, color="orange")
-            # can be tiny differance but it's not critical.
-        elif value > 0 and detect ==1 and choice.value=="L":
-            drawing.rectangle((size-sensing)*factor_w, y1, size*factor_w, y2, color="orange")
+
 
 # 10. 3m 넘어가는 값 삭제(뺄셈)  
     # Over 3m, remove / must be after draw source
@@ -325,9 +305,6 @@ def valueChanged(value, direction): #-------------------------------------------
     #buzzer3_끝과 끝
     if buz_case==1 and list_t[-1][1]+stain >= size:
         flag_del += 1
-    if choice.value == "L":
-        if buz_case==1 and list_p[-1][1]+stain >= size:
-            flag_del += 1
     
     #warning_1_rot & light
     if detect == 1 and len(ROT)==2  : # stain find & exist
@@ -402,14 +379,10 @@ app=App(title="Hairpin Stain Sensor", width=app_size*factor_w, height=200*factor
 app.when_closed=handle_exit
 #app.set_full_screen()
 
-ch_box= Box(app,layout="grid",grid=[0,0])
-text_ch = Text(ch_box, text="Stain:", grid=[0,0])
-choice = ButtonGroup(ch_box, options=[ ["Point", "P"], ["Line", "L"]], selected="P", horizontal=True, grid=[1,0])
-
 text_1 = Text(app, text="Ready", width="fill", height="2",size=25) #heihgt=2, size=30
 
 #button
-button_box= Box(app,layout="grid",grid=[0,2])
+button_box= Box(app,layout="grid",grid=[0,1])
 onoff=PushButton(button_box,command=handle_exit, text="Turn Off", grid=[0,0], pady=25)
 onoff.bg="gray"
 onoff.text_size=15
@@ -450,6 +423,9 @@ Text(box,text="Sensing Point",align="right")
 
 write_file("\n\n< START >\n")
 write_file("1. time     2. length[cm]  (S:Stain, 0:Pin)\n")
+
+cfa_txt=Text(app,text="●",size=15, align="right")
+
 
 app.display()
 
