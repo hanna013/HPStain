@@ -265,6 +265,7 @@ def valueChanged(value, direction): #-------------------------------------------
                     if d < len(time1):
                         list_log.append([time1[-1],list_t[-1]])
                         print("log save1")
+                        d=len(time1)
                     S=[]
                     t=0
                     list_t.append([list_p[o][0],list_p[o][1]]) # it might be not pin, it can be long full-stain.
@@ -370,7 +371,6 @@ def valueChanged(value, direction): #-------------------------------------------
     a=len(list_p)
     b=len(list_t)
     c=len(list_p)
-    d=len(time1)
     
 """
 ------------------------------------- Main --------------------------------------
