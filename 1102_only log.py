@@ -203,7 +203,7 @@ def valueChanged(value, direction): #-------------------------------------------
         sensing= round(((value+1)*circum/resolution),2) # define
 
 # 4. stain(=얼룩 실시간 디스플레이용) 계산
-# 작은 얼룩일 때용으로 만든거라 현재 센싱 중인 작은 값에 대해서는 더해지지 않아서 실제보단 살짝 짧음.그래서 그릴 때 sensing값을 추가해서 그림
+# 작은 얼룩일 때용으로 만든거라 현재 센싱 중인 작은 값에 대해서는 더해지지 않아서 실제보단 살짝 짧음.그래서 그릴 때나 보여줄 땐 sensing값을 추가함.
     # Calculating small spots(=stain) in real time.
     if len(ROT)>=1 and c < len(list_p):
         if len(list_p) == 2 and list_p[-1][0] == "S":  # 시작을 10cm 미만의 핀으로 하면 이 값은 stain에 안 더함, but 3M 가까이에서 값 사라지는 경우 제거하고자 t에는 더해짐. 
@@ -220,7 +220,7 @@ def valueChanged(value, direction): #-------------------------------------------
 # 6. 텍스트 변경 및 ROT, stain 초기화    
     # text
     if detect==1 and stain>0: 
-        text_1.value="Stain:",int(stain+sensing),"cm" # can be tiny differance 
+        text_1.value="Stain:",int(stain+round(((value+1)*circum/resolution),2)),"cm" # can be tiny differance 
         text_1.text_color = "red"
     elif detect==0 and s_flag==1: # ----------------------------------------text delay
         text_1.value="No Stain"
