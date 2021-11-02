@@ -100,6 +100,7 @@ def reset():
     write_file("1. time     2. length[cm] (S:Stain, 0:Pin)\n")
     
     e1.resetValue()
+    #cfa_txt.text_color = "black"
 
 def write_file(data): 
     today= time.strftime('%m%d',time.localtime(time.time()))
@@ -162,7 +163,7 @@ def valueChanged(value, direction): #-------------------------------------------
 # 2. p에 값 저장, 얼룩 <-> 핀
     if GPIO.input(CFA)==0 : # Adjust the optical fiber sensor so that there's no wrong value.
         ROT.append([1]) # To check if it's a real stain
-        cfa_txt.text_color = "yellow"
+        cfa_txt.text_color = "red"
         #write detecting time
         if len(ROT)==2: #
             time1= time.strftime('%X',time.localtime(time.time()))
@@ -184,7 +185,7 @@ def valueChanged(value, direction): #-------------------------------------------
             
         detect = 1 
     else:
-        cfa_txt.text_color = "red"
+        cfa_txt.text_color = "green"
         #save or not
         if detect == 1:
             list_p.append(["S",round((value)*circum/resolution,2)])
@@ -282,7 +283,7 @@ def valueChanged(value, direction): #-------------------------------------------
         drawing.rectangle(0,y1,size*factor_w, y2, color="gold") # initialize
         for k in range(1,len(point)): # sensing ++ -> 
             if point[k][0] == "S":
-                drawing.rectangle((size-point[k][1]-sensing-stain)*factor_w, y1, (size-point[k][1]-sensing-stain+pre_point[k][1])*factor_w, y2, color="red")
+                drawing.rectangle((size-point[k][1]-sensing-stain)*factor_w, y1, (size-point[k][1]-sensing-stain+list_t[k][1])*factor_w, y2, color="red")
         # 9.2 현재 센싱 및 판별 중인 값
         # To display it in real time-------------------------------------------------------------------------------------------------------------------------@
         if len(ROT)>0:
@@ -424,10 +425,9 @@ Text(box,text="Sensing Point",align="right")
 write_file("\n\n< START >\n")
 write_file("1. time     2. length[cm]  (S:Stain, 0:Pin)\n")
 
-cfa_txt=Text(app,text="●",size=15, align="right")
+cfa_txt=Text(app,text="●",size=20, align="right")
 
 
 app.display()
-
 
 
