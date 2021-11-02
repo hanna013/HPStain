@@ -152,44 +152,41 @@ def valueChanged(value, direction): #-------------------------------------------
 # 1. value 초기화
     if round((value*circum/resolution),2)> size: # 버저 여러 번 안 울리기 위해서는 초기화 값 조정이 중요
         del_R=1
-        e1.resetValue()
         e1.resetValue() # not working, del too
-        print("reset")
-        #print("pit=",point)
-        #print(sensing)
-        print("v=",value)
-        #print("t=", list_t)
-        #print(list_p)
-        
     
     no_stain=0
     p_flag=0
 
-# 2. 얼룩 <-> 핀, p에 값 저장
+# 2. p에 값 저장, 얼룩 <-> 핀
     if GPIO.input(CFA)==0 : # Adjust the optical fiber sensor so that there's no wrong value.
         ROT.append([1]) # To check if it's a real stain
 
-            #write detecting time
+        #write detecting time
         if len(ROT)==2: #
             time1= time.strftime('%X',time.localtime(time.time()))
   
         #save or not
         if detect == 0:
-            if round((value*circum/resolution),2) >= chk:
+            if s_flag==1:
                 list_p[-1][1]=round(((value)*circum/resolution),2)
                 e1.resetValue()
                 s_flag=0
-                p_flag=1
+                p_flag=1 # p의 원소 갯수가 커진 것은 아니지만, 값이 바꿨으니 t와 point를 새롭게 계산하라는 신호
             else:
+                # 앞 값이 핀이면 전값 + 현재 값 더하기 - 여기는 S_FLAG 전의 핀 값
+                # CFA 문제든, 사용자의 문제든 / 그럼 value가 1이라도 변하면서 cfa 값이 변해야 하는건데 막 (0,0) (1,0) 나오는 이유는 뭐야 - value 1 에 0.1256cm 인데 반올림해서 사라질 값도 아니자나
+                # 그럼 value가 올라갔는데 저장되기 전에 reset 됐다는 건데, 저장 전에 리셋되지 않는데....
                 list_p.append([0,round(((value)*circum/resolution),2)])
-                e1.resetValue() # 
+                e1.resetValue()
+                
+            
         detect = 1 
     else:
         #save or not
         if detect == 1:
             list_p.append(["S",round((value)*circum/resolution,2)])
             e1.resetValue()
-        if value==int(chk*resolution/circum)+1: # sensing = 10.048cm, value=79+1
+        if value==int(chk*resolution/circum)+1: # value=79+1 -> sensing = 10.048cm 
             list_p.append([0,round((value)*circum/resolution,2)])
             s_flag=1
         detect = 0
