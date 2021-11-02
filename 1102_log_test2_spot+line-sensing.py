@@ -260,26 +260,21 @@ def valueChanged(value, direction): #-------------------------------------------
                 S.append(list_p[o][0]) # sign: adding small stains
             else:
                 if len(S)>0:
-                    list_t.append(["S",round(t,2)])
-                    if d < len(time1) and b<len(list_t):
-                        list_log.append([time1[-1],list_t[-1][1]])
-                        print(list_t)
-                        print("log save1")
-                        d=len(time1)
-                    S=[]
-                    t=0
-                    list_t.append([list_p[o][0],list_p[o][1]]) # it might be not pin, it can be long full-stain.
-                    if list_p[o][0]=="S"and b<len(list_t):
-                       list_log[-1]=[time1[-1], list_t[-2][1]+list_t[-1][1]]
-                       print("log save2")
-                else:
-                    list_t.append([list_p[o][0],list_p[o][1]])
-                    if list_p[o][0]==0:
-                        list_p[o][0]="P"
-                    elif list_p[o][0]=="S" and b<len(list_t):
-                        list_log.append([time1[-1],list_t[-1][1]])
-                        print("log save3")
-        
+                    if list_p[o][0] == "S":
+                        t += list_p[o][1]
+                    else:
+                        list_t.append(["S",round(t,2)])
+                        if d < len(time1) and b<len(list_t):
+                            list_log.append([time1[-1],list_t[-1][1]])
+                            print(list_t)
+                            print("log save1--------------------------------------------------------------------------------------------------")
+                            d=len(time1)
+                        S=[]
+                        t=0
+                        list_t.append([list_p[o][0],list_p[o][1]]) # pin > 10cm
+                if list_p[o][0]==0:
+                    list_p[o][0]="P"
+                        
         # 7.2 point 계산
         point=[[0,0]]*len(list_t)
         for i in range(len(list_t)): # 0 1 2 ...
