@@ -31,9 +31,10 @@ over_3M=2
 point = [] # save x coordinate
 plus=0
 flag_del=0
-a=1 #list_p length
-b=0 #list_t length
-c=0 #list_p length_stain cal
+a=1 #list_p len
+b=0 #list_t len
+c=0 #list_p len_stain cal
+d=0 #time1 len
 total=0 # point[0]
 draw_count=0 # minimize load because of drawing
 no_stain=0 #flag
@@ -46,6 +47,8 @@ point=[[0,0]]
 stain=0 # there is a gap between saving and showing
 sensing=0
 s_flag=0
+time1=[]
+list_log=[]
 
 def rotation_off():
     rotation_off.bg = "light gray"
@@ -62,7 +65,7 @@ def light_off():
     GPIO.output(light,GPIO.LOW)
     
 def reset():
-    global list_p, detect, over_3M, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
+    global d, time1, list_log, list_p, detect, over_3M, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
     
     list_p = [[0,0]] # save length
     detect = 2 # marking CFA status 
@@ -72,6 +75,7 @@ def reset():
     a=1 #list_p length
     b=0 #list_t length
     c=0 #list_p length_stain cal
+    d=0
     total=0 # point[0]
     draw_count=0 # minimize load because of drawing
     no_stain=0 #flag
@@ -102,6 +106,10 @@ def reset():
     
     e1.resetValue()
     #cfa_txt.text_color = "black"
+    
+    time1=[]
+    write_file(str(list_log)+"\n")
+    list_log=[]
 
 def write_file(data): 
     today= time.strftime('%m%d',time.localtime(time.time()))
@@ -122,6 +130,9 @@ def handle_exit():
     GPIO.output(buzzer,GPIO.LOW)
     #rotation_off.cancel(stop_rot)
     #buzzer_off.cancel(stop_buz)
+    
+    write_file(str(list_log)+"\n")
+    
     app.destroy()
 
 def stop_rot():
@@ -141,14 +152,17 @@ def warning_rot_light():
     rotation_off.after(5000,stop_rot)
 
 def valueChanged(value, direction): #----------------------------------------------------------------------------------------------------------------
-    global list_p, detect, over_3M, pin_length, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
+    global d, time1, list_log, list_p, detect, over_3M, pin_length, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
     
     #print("p=",point)
     #print(sensing)
     #print("v=",value)
-    print(list_p)
-    print("t=", list_t)
+    #print(list_p)
+    #print("t=", list_t)
+    print(time1)
+    print("log=",list_log)
     print("\n")
+    
    
 # 1. value 초기화
     if round((value*circum/resolution),2)> size: # 버저 여러 번 안 울리기 위해서는 초기화 값 조정이 중요
@@ -165,9 +179,10 @@ def valueChanged(value, direction): #-------------------------------------------
     if GPIO.input(CFA)==0 : # Adjust the optical fiber sensor so that there's no wrong value.
         ROT.append([1]) # To check if it's a real stain
         cfa_txt.text_color = "red"
+        
         #write detecting time
-        if len(ROT)==2: #
-            time1= time.strftime('%X',time.localtime(time.time()))
+        if len(ROT)==2:
+            time1.append(time.strftime('%X',time.localtime(time.time())))
   
         #save or not
         if detect == 0:
@@ -247,12 +262,19 @@ def valueChanged(value, direction): #-------------------------------------------
             else:
                 if len(S)>0:
                     list_t.append(["S",round(t,2)])
+                    if d < len(time1):
+                        list_log.append([time1,list_t[-1]])
                     S=[]
                     t=0
                     list_t.append([list_p[o][0],list_p[o][1]]) # it might be not pin, it can be long full-stain.
+                    if list_p[o][0]=="S":
+                       list_log[-1]=[time1, list_t[-2][1]+list_t[-1][1]]
                 else:
                     list_t.append([list_p[o][0],list_p[o][1]])
-                    list_p[o][0]="P"
+                    if list_p[o][0]==0:
+                        list_p[o][0]="P"
+                    elif list_p[o][0]=="S":
+                        list_log.append([time1,list_t[-1]])
         
         # 7.2 point 계산
         point=[[0,0]]*len(list_t)
@@ -347,6 +369,7 @@ def valueChanged(value, direction): #-------------------------------------------
     a=len(list_p)
     b=len(list_t)
     c=len(list_p)
+    d=len(time1)
     
 """
 ------------------------------------- Main --------------------------------------
