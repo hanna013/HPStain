@@ -105,10 +105,11 @@ def reset():
     write_file("1. time     2. length[cm] (S:Stain, 0:Pin)\n")
     
     e1.resetValue()
-    #cfa_txt.text_color = "black"
+    cfa_txt.text_color = "black"
     
     time1=[]
-    write_file(str(list_log)+"\n")
+    for v in range(len(list_log)):
+        write_file(str(list_log[v][0])+"    "+str(list_log[v][1])\n")
     list_log=[]
 
 def write_file(data): 
@@ -131,8 +132,8 @@ def handle_exit():
     #rotation_off.cancel(stop_rot)
     #buzzer_off.cancel(stop_buz)
     
-    write_file(str(list_log)+"\n")
-    
+    for v in range(len(list_log)):
+        write_file(str(list_log[v][0])+"    "+str(list_log[v][1])\n")
     app.destroy()
 
 def stop_rot():
