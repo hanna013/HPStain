@@ -155,7 +155,8 @@ def valueChanged(value, direction): #-------------------------------------------
     global d, time1, list_log, list_p, detect, over_3M, pin_length, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
     
     #print("p=",point)
-    #print(sensing)
+    print(sensing)
+    print(stain)
     #print("v=",value)
     #print(list_p)
     #print("t=", list_t)
