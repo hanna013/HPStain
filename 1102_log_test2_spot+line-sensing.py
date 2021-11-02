@@ -250,34 +250,43 @@ def valueChanged(value, direction): #-------------------------------------------
         del_R=0
         # tie small stains : list_p -> list_t
         t=0
-        S=[] # stain or not 
         
         # 7.1 t 계산, 리셋되고 다시 계산될 때마다 로그가 들어가고 있음 여기서 넣으면 안됨.
         #list_p -> list_t
         for o in range(1, len(list_p)): # 1 2 ..
-            #print(o,t)
-            if list_p[o][1] < chk and list_p[o][0] != "P":
+            # 1. 점 얼룩
+            # 2. 긴 얼룩
+            # 3. 점 얼룩 - 긴 얼룩
+            # 4. 긴 얼룩 - 점 얼룩
+            # 5. P로 시작 - 저장 x / 0으로 시작 -> 길이에 따라 p가 되든 t에 더해지든
+            if list_p[o][1] < chk and list_p[o][0] != "P": #chk보다 작고, P가 아닌 원소들(= chk 이상의 핀 X)
                 t += list_p[o][1]
-                S.append(list_p[o][0]) # sign: adding small stains
             else:
-                if len(S)>0:
-                    if list_p[o][0] == "S":
+                if t>0:
+                    if list_p[o][0] == "S": # 선 얼룩 저장
                         t += list_p[o][1]
                     else:
                         list_t.append(["S",round(t,2)])
                         if d < len(time1) and b<len(list_t):
                             list_log.append([time1[-1],list_t[-1][1]])
-                            print(list_t)
-                            print("log save1--------------------------------------------------------------------------------------------------")
                             d=len(time1)
                         S=[]
                         t=0
-                        list_t.append([list_p[o][0],list_p[o][1]]) # pin > 10cm
+                        list_t.append([list_p[o][0],list_p[o][1]]) # pin > chk
                 else:
-                    if list_p[o][0]=="S" and o==1:
+                    if list_p[o][0]=="S":
                         t += list_p[o][1]
-                if list_p[o][0]==0:
-                    list_p[o][0]="P"
+                    if list_p[o][0]=="P" and t>0:
+                        list_t.append(["S",round(t,2)])
+                        if d < len(time1) and b<len(list_t):
+                            list_log.append([time1[-1],list_t[-1][1]])
+                            d=len(time1)
+                        S=[]
+                        t=0
+                        list_t.append([list_p[o][0],list_p[o][1]]) # chk 이상 핀으로 "P"로 새겨진 핀 저장
+                        
+                if list_p[o][0]==0 and list_p[o][1]>chk: # 10cm 이상의 핀 값은 P로 기록해서 나중에 얼룩 재계산할 때 더해지지 않도록 함. 
+                    list_p[o][0]="P" 
                         
         # 7.2 point 계산
         point=[[0,0]]*len(list_t)
