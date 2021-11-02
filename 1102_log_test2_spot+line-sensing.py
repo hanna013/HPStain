@@ -155,13 +155,13 @@ def valueChanged(value, direction): #-------------------------------------------
     global d, time1, list_log, list_p, detect, over_3M, pin_length, s_flag, point, plus, stain, sensing, flag_del, a, b, c, total, draw_count, no_stain, buz_case, del_R, time1, ROT, list_t
     
     #print("p=",point)
-    print(sensing)
-    print(stain)
+    #print("sensing=",sensing)
+    #print("stain=",stain)
     #print("v=",value)
-    #print(list_p)
-    #print("t=", list_t)
-    print(time1)
-    print("log=",list_log)
+    print(list_p)
+    print("t=", list_t)
+    #print(time1)
+    #print("log=",list_log)
     print("\n")
     
    
@@ -222,7 +222,7 @@ def valueChanged(value, direction): #-------------------------------------------
     if len(ROT)>=1 and c < len(list_p):
         if len(list_p) == 2 and list_p[-1][0] == "S":  # 시작을 10cm 미만의 핀으로 하면 이 값은 stain에 안 더함, but 3M 가까이에서 값 사라지는 경우 제거하고자 t에는 더해짐. 
             stain += list_p[-1][1] # no add sensing value
-        if len(list_p) > 2 and list_p[-1][1]<chk:
+        if len(list_p) > 2: #  and list_p[-1][1]<chk
             stain += list_p[-1][1] # no add sensing value
 
 
@@ -233,7 +233,7 @@ def valueChanged(value, direction): #-------------------------------------------
 
 # 6. 텍스트 변경 및 ROT, stain 초기화    
     # text
-    if detect==1 and stain>0: 
+    if detect==1: 
         text_1.value="Stain:",int(stain+round(((value+1)*circum/resolution),2)),"cm" # can be tiny differance 
         text_1.text_color = "red"
     elif detect==0 and s_flag==1: # ----------------------------------------text delay
@@ -255,6 +255,7 @@ def valueChanged(value, direction): #-------------------------------------------
         # 7.1 t 계산, 리셋되고 다시 계산될 때마다 로그가 들어가고 있음 여기서 넣으면 안됨.
         #list_p -> list_t
         for o in range(1, len(list_p)): # 1 2 ..
+            #print(o,t)
             if list_p[o][1] < chk and list_p[o][0] != "P":
                 t += list_p[o][1]
                 S.append(list_p[o][0]) # sign: adding small stains
@@ -272,6 +273,9 @@ def valueChanged(value, direction): #-------------------------------------------
                         S=[]
                         t=0
                         list_t.append([list_p[o][0],list_p[o][1]]) # pin > 10cm
+                else:
+                    if list_p[o][0]=="S" and o==1:
+                        t += list_p[o][1]
                 if list_p[o][0]==0:
                     list_p[o][0]="P"
                         
