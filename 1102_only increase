@@ -241,21 +241,25 @@ def valueChanged(value, direction): #-------------------------------------------
         #list_p -> list_t
         for o in range(1, len(list_p)): # 1 2 ..
             if list_p[o][1] < chk:
+                list_p[o][0]="S" # 10cm 보다 작은 값은 모두 얼룩으로 정의 - 3m 도달했을 때 얼룩이 사라지거나 줄어들지 않도록 - 10cm보다 작은 핀이 존재할 수 없음.
+                
+            if list_p[o][0]="S":
                 t += list_p[o][1]
-                S.append(list_p[o][0]) # sign: adding small stains
+                #S.append(list_p[o][0]) # sign: adding small stains
             else:
-                if len(S)>0:
-                    list_t.append(["S",round(t,2)])
-                    write_file(str(time1)+"    "+str(list_t[-1])+"\n")
-                    S=[]
-                    t=0
-                    list_t.append([list_p[o][0],list_p[o][1]]) # it might be not pin, it can be long full-stain.
-                    if list_p[o][0]=="S":
-                        write_file(str(time1)+"    "+str(list_t[-1])+"  Please calculate by adding this and the previous stain length\n")
+                #if len(S)>0:
+                list_t.append(["S",round(t,2)])
+                write_file(str(time1)+"    "+str(list_t[-1])+"\n")
+                #S=[]
+                t=0
+                list_t.append([list_p[o][0],list_p[o][1]]) # pin(>10cm)
+                """
                 else:
-                    list_t.append([list_p[o][0],list_p[o][1]])
+                    list_t.append([list_p[o][0],list_p[o][1]]) # pin(<10cm)
+                    
                     if list_p[o][0]=="S":
                         write_file(str(time1)+"    "+str(list_t[-1])+"\n")
+                """
         
         # 7.2 point 계산
         point=[[0,0]]*len(list_t)
