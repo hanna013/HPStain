@@ -102,14 +102,14 @@ def reset():
     drawing.rectangle(0,y1,size*factor_w, y2, color="gold") #x1,y1,x2,y2
     
     write_file("\n\n< RESET >\n")
-    write_file("1. time     2. length[cm] (S:Stain, 0:Pin)\n")
+    write_file("1. time     2. length[cm]\n")
     
     e1.resetValue()
     cfa_txt.text_color = "black"
     
     time1=[]
     for v in range(len(list_log)):
-        write_file(str(list_log[v][0])+"    "+str(list_log[v][1])\n")
+        write_file(str(list_log[v][0])+"    "+str(list_log[v][1])+"\n")
     list_log=[]
 
 def write_file(data): 
@@ -133,7 +133,7 @@ def handle_exit():
     #buzzer_off.cancel(stop_buz)
     
     for v in range(len(list_log)):
-        write_file(str(list_log[v][0])+"    "+str(list_log[v][1])\n")
+        write_file(str(list_log[v][0])+"    "+str(list_log[v][1])+"\n")
     app.destroy()
 
 def stop_rot():
@@ -285,6 +285,8 @@ def valueChanged(value, direction): #-------------------------------------------
                         S=[]
                         t=0
                         list_t.append([list_p[o][0],list_p[o][1]]) # chk 이상 핀으로 "P"로 새겨진 핀 저장
+                    if list_p[o][0]=="P" and t==0:
+                        list_t.append([list_p[o][0],list_p[o][1]])
                         
                 if list_p[o][0]==0 and list_p[o][1]>chk: # 10cm 이상의 핀 값은 P로 기록해서 나중에 얼룩 재계산할 때 더해지지 않도록 함. 
                     list_p[o][0]="P" 
@@ -349,9 +351,10 @@ def valueChanged(value, direction): #-------------------------------------------
         no_stain =1
         GPIO.output(light,GPIO.LOW)
     
+    print(buz_case)
     # buzzer 1: 중간에 42 이상 값 있을 때
     if len(list_t) > 1 and buz_case==1: # ----------------pver_3m--------------------------------------------------------------- a>1
-        if list_t[1][0]==0 and list_t[1][1] >= pin_length: # == 299 (x) #리스트 0번째 값 없애면 여기도 수정하기. and point[0][1]+round(value*circum/resolution,2)>= 299
+        if list_t[1][0]=="P" and list_t[1][1] >= pin_length: # == 299 (x) #리스트 0번째 값 없애면 여기도 수정하기. and point[0][1]+round(value*circum/resolution,2)>= 299
             buzzer_off.bg="orange"
             buzzer_off.after(5000,stop_buz)
             GPIO.output(buzzer,GPIO.HIGH)
@@ -459,7 +462,7 @@ Text(box,text=" ⇧",align="right")
 Text(box,text="Sensing Point",align="right")
 
 write_file("\n\n< START >\n")
-write_file("1. time     2. length[cm]  (S:Stain, 0:Pin)\n")
+write_file("1. time     2. length[cm]\n")
 
 cfa_txt=Text(app,text="●",size=20, align="right")
 
