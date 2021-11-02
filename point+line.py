@@ -295,12 +295,17 @@ def valueChanged(value, direction): #-------------------------------------------
     if total+sensing >= size:
         print("over 3M")
         over_3M=1
-        list_p[1][1] = round(list_p[1][1]-(total+sensing-size),2) 
+        list_p[1][1] = round(list_p[1][1]-(total+sensing-size),2)
+        list_t[1][1] = round(list_t[1][1]-(total+sensing-size),2) 
         # 센싱이 음수값이 나오면/TOTAL이 이미 더 작은 값으로 계산됐고, SENSING이 큰 거임. 이미 어쨋든 사이즈보다 크니까 값은 줄어들거고 그럼 음수값이 더 음수가 되니까 음수값은 바로 삭제
-        if list_p[1][1]<=0.1: 
+        if list_p[1][1]<=0.1:
             del list_p[1]
+        if list_t[1][1]<=0.1:
+            del list_t[1]
             buz_case=1
-            print("delete first point")
+            print("delete first element of T")
+          
+        
 
 # 11. 경광등
     #buzzer3_끝과 끝
@@ -320,20 +325,20 @@ def valueChanged(value, direction): #-------------------------------------------
     
     # buzzer 1: 중간에 42 이상 값 있을 때
     print("over3?=", over_3M)
-    if len(list_t) > 1 and buz_case==1: # ----------------pver_3m--------------------------------------------------------------- a>1
-        if list_t[1][0]==0 and list_t[1][1] >= pin_length: # == 299 (x) #리스트 0번째 값 없애면 여기도 수정하기. and point[0][1]+round(value*circum/resolution,2)>= 299
+    if len(list_t) > 1 and buz_case==1: # ----------------------------------------- a>1
+        if list_t[1][0]==0 and list_t[1][1] >= pin_length: #리스트 0번째 값 없애면 여기도 수정하기.
             buzzer_off.bg="orange"
             buzzer_off.after(5000,stop_buz)
             GPIO.output(buzzer,GPIO.HIGH)
             buz_case=0
-            print("b1")
+            print("buz_42cm")
 
     # buzzer 2: 마지막 얼룩이 3m를 모두 지나갔을 때
     if no_stain==1:
         buzzer_off.bg="orange"
         buzzer_off.after(5000,stop_buz)
         GPIO.output(buzzer,GPIO.HIGH)
-        print("b2")
+        print("buz_end")
         print(sensing)
         print(round((value*circum/resolution),2))
         
@@ -344,7 +349,7 @@ def valueChanged(value, direction): #-------------------------------------------
         buzzer_off.bg="orange"
         buzzer_off.after(5000,stop_buz)
         GPIO.output(buzzer,GPIO.HIGH)
-        print("b3")
+        print("buz_end & start")
         
         
     a=len(list_p)
