@@ -221,7 +221,7 @@ def valueChanged(value, direction): #-------------------------------------------
     if choice.value == "P":
         if detect==1 and stain>0: 
             #text_1.value="Stain"
-            text_1.value="Stain:",round(stain+sensing,2),"cm" # can be tiny differance 
+            text_1.value="Stain:",int(stain+sensing),"cm" # can be tiny differance 
             text_1.text_color = "red"
         elif detect==0 and s_flag==1: # ----------------------------------------text delay
             text_1.value="No Stain"
@@ -340,22 +340,16 @@ def valueChanged(value, direction): #-------------------------------------------
         no_stain =1
         GPIO.output(light,GPIO.LOW)
     
-    # warning2_buzzer
     # buzzer 1: 중간에 42 이상 값 있을 때
-    if choice.value == "P":
-        print("over3?=", over_3M)
-        if len(list_t) > 1 and over_3M==0: # ------------------------------------------------------------------------------- a>1
-            if list_t[1][0]==0 and list_t[1][1] >= pin_length: # == 299 (x) #리스트 0번째 값 없애면 여기도 수정하기.  and point[0][1]+round(value*circum/resolution,2)>= 299
-                buzzer_off.bg="orange"
-                buzzer_off.after(5000,stop_buz)
-                GPIO.output(buzzer,GPIO.HIGH)
-                print("b1")
-    elif choice.value == "L":
-        if len(list_p) > 1 and over_3M==0: # ------------------------------------------------------------------------------- a>1
-            if list_p[1][0]==0 and list_p[1][1] >= pin_length and point[0][1]+round(value*circum/resolution,2)>= 299: # == 299 (x) #리스트 0번째 값 없애면 여기도 수정하기.
-                buzzer_off.bg="orange"
-                buzzer_off.after(5000,stop_buz)
-                GPIO.output(buzzer,GPIO.HIGH)
+    print("over3?=", over_3M)
+    if len(list_t) > 1 and buz_case==1: # ----------------pver_3m--------------------------------------------------------------- a>1
+        if list_t[1][0]==0 and list_t[1][1] >= pin_length: # == 299 (x) #리스트 0번째 값 없애면 여기도 수정하기. and point[0][1]+round(value*circum/resolution,2)>= 299
+            buzzer_off.bg="orange"
+            buzzer_off.after(5000,stop_buz)
+            GPIO.output(buzzer,GPIO.HIGH)
+            buz_case=0
+            print("b1")
+
     # buzzer 2: 마지막 얼룩이 3m를 모두 지나갔을 때
     if no_stain==1:
         buzzer_off.bg="orange"
@@ -458,7 +452,6 @@ write_file("\n\n< START >\n")
 write_file("1. time     2. length[cm]  (S:Stain, 0:Pin)\n")
 
 app.display()
-
 
 
 
